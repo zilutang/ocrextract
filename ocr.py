@@ -74,10 +74,13 @@ def strategy_merge_direct(var1, var2):
 
 def strategy_merge_long(text, var1, addlist):
     str=text[var1]["element_value"]
-    for item in addlist:
-        str = str + text[var1 + item]["element_value"]
-    #print(str)
-    return str
+    if addlist[0] == 0:
+        return str
+    else:
+        for item in addlist:
+            str = str + text[var1 + item]["element_value"]
+        #print(str)
+        return str
 
 def postprocess(var, *args):
     return var
@@ -85,6 +88,9 @@ def postprocess(var, *args):
 def postproess_1(var, *args):
     #“甲方(卖方)”
     return var.replace('::', ':')
+
+def postprocess_vessel(var, args):
+    return args[0][0]+var
 
 def postprocess_substring(var, varlist):
     #print(varlist)
@@ -107,13 +113,13 @@ def find_element_name(element_value, text, strategy_index, strategy_compare, str
             print(result)
             return (result)
 
-def find_element_name_long(element_value, text, strategy_compare, strategy_merge=None, addlist=[], postprocess=postprocess, *args):
+def find_element_name_long(element_value, text, strategy_compare, strategy_merge=None, addlist=[], postprocess=postprocess, args=[]):
     for i in range(len(text)):
         if strategy_compare(element_value, text[i]["element_value"]):
             #print("key:", element_value)
             result = postprocess(strategy_merge(text, i, addlist), args)
-    print(result)
-    return (result)
+            print(result)
+            return (result)
 
 def find_list_element_name_ht_LXDH(element_value, text, strategy_index, strategy_compare, strategy_merge, postprocess=postprocess, *args):
     resultlist = []
@@ -163,23 +169,42 @@ def testhetong(file):
     find_element_name("本商品房总成交金额", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_re, [r"本商品房总成交.{0,5}[0-9: ]*元整"])
 
 
+
+
+
 #国际结算业务
 def testgjjs(file):
     r = postfile(file)
     text = gettext(r)
     box = getbox(r)
     
-    find_element_name("Your Documentary Credit No", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
-    find_list_element_name_gjjs_LC("Drawn under documentary credit number", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'documentary credit number.*'])
-    find_element_name("PORT OF LOADING", text, strategy_index_add2, strategy_compare_part, strategy_merge_direct)
-    find_element_name("PORT OF DISCHARGE", text, strategy_index_add2, strategy_compare_part, strategy_merge_direct)
-    find_element_name("CONTRACT NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
-    find_element_name("L/C NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
-    find_element_name("INV NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
-    find_element_name("Ocean Vessel", text, strategy_index_add4, strategy_compare_part, strategy_merge_direct)
-    find_element_name("Bill of Lading No", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
-    find_element_name("Port of Discharge", text, strategy_index_add3, strategy_compare_part, strategy_merge_direct)
-    find_element_name_long(element_value="Port of Loading", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[4,5])
+
+    if "COAST FRASER ENTERPRISES LTD." == find_element_name_long(element_value="COAST FRASER", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[0]):
+        find_element_name_long(element_value="Invoice No.", text=text, strategy_compare=strategy_compare_full, strategy_merge=strategy_merge_long, addlist=[1])
+        find_element_name_long(element_value="Port of Loading", text=text, strategy_compare=strategy_compare_full, strategy_merge=strategy_merge_long, addlist=[1])
+        find_element_name_long(element_value="Contract No.", text=text, strategy_compare=strategy_compare_full, strategy_merge=strategy_merge_long, addlist=[1])
+        find_element_name_long(element_value="Port of Discharge", text=text, strategy_compare=strategy_compare_full, strategy_merge=strategy_merge_long, addlist=[1])
+        find_element_name_long(element_value="Carrier Vessel", text=text, strategy_compare=strategy_compare_full, strategy_merge=strategy_merge_long, addlist=[1])
+        find_element_name_long(element_value="LC No.", text=text, strategy_compare=strategy_compare_full, strategy_merge=strategy_merge_long, addlist=[1])
+        find_element_name_long(element_value="BL No.", text=text, strategy_compare=strategy_compare_full, strategy_merge=strategy_merge_long, addlist=[1])
+    else:  
+        find_element_name("Your Documentary Credit No", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
+        find_list_element_name_gjjs_LC("Drawn under documentary credit number", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'documentary credit number.*'])
+        find_element_name("PORT OF LOADING", text, strategy_index_add2, strategy_compare_part, strategy_merge_direct)
+        find_element_name("PORT OF DISCHARGE", text, strategy_index_add2, strategy_compare_part, strategy_merge_direct)
+        find_element_name("CONTRACT NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'(.+(?=,))'])
+        find_element_name("L/C NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
+        find_element_name("L/C No", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'(.+(?= DATED))'])
+        find_element_name("INV NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
+        find_element_name("Ocean Vessel", text, strategy_index_add4, strategy_compare_part, strategy_merge_direct)
+        find_element_name("Bill of Lading No", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
+        find_element_name("Port of Discharge", text, strategy_index_add3, strategy_compare_part, strategy_merge_direct)
+        find_element_name_long(element_value="Port of Loading", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[4,5])
+        find_element_name_long(element_value="Invoice", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[1])
+        find_element_name_long(element_value="Contract #", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[5])
+        find_element_name_long(element_value="B/L NO", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[0], postprocess=postprocess_re, args=[[r'(.+(?= PAGE))']])
+        find_element_name_long(element_value="essel:", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[0], postprocess=postprocess_vessel, args=[["V"]])
+
 
 
 
