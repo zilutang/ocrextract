@@ -5,6 +5,7 @@ import json
 import requests
 import base64
 import os.path as osp
+import re
 
 
 def convert_b64(file):
@@ -76,6 +77,12 @@ def postprocess_substring(var, varlist):
     result = var[index_start:(index_end + len(varlist[0][1]))]
     return result
 
+def postprocess_re(var, restring):
+    print(var)
+    print(restring[0][0])
+    reresult = re.search(restring[0][0], var, re.M|re.I)
+    return reresult.group()
+
 def find_element_name(element_value, text, strategy_index, strategy_compare, strategy_merge, postprocess=postprocess, *args):
     for i in range(len(text)):
         if strategy_compare(element_value, text[i]["element_value"]):
@@ -115,10 +122,14 @@ def testhetong(file):
     find_list_element_name("联系电话:", text, strategy_index_add1, strategy_compare_full, strategy_merge_direct)
     find_element_name("本商品房项目:", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
     find_element_name("本商品房座落为", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
-    find_element_name("本商品房建筑面积", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_substring, ["本商品房建筑面积", "平方米"])
-    find_element_name("总成交金额为", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_substring, ["总成交金额为", "元整"]) 
-    find_element_name("本商品房为清水房", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_substring, ["建筑面积单价", "平方米"])
-    find_element_name("本商品房总成交金额", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_substring, ["本商品房总成交", "元整"])
+    #find_element_name("本商品房建筑面积", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_substring, ["本商品房建筑面积", "平方米"])
+    find_element_name("本商品房建筑面积", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'本商品房.*[0-9: ]*平方米'])
+    #find_element_name("总成交金额为", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_substring, ["总成交金额为", "元整"]) 
+    find_element_name("总成交金额为", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_re, [r'总成交金额为[0-9, ]*元整']) 
+    #find_element_name("本商品房为清水房", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_substring, ["建筑面积单价", "平方米"])
+    #find_element_name("本商品房总成交金额", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_substring, ["本商品房总成交", "元整"])
+    find_element_name("本商品房为清水房", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r"建筑面积.{0,20}平方米"])
+    find_element_name("本商品房总成交金额", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_re, [r"本商品房总成交.{0,5}[0-9: ]*元整"])
 
     open('test.json', 'w').write(json.dumps(r.json(), ensure_ascii=False, indent=2))
 
