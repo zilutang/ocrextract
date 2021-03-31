@@ -91,43 +91,63 @@ def find_element_name(element_value, text, strategy_index, strategy_compare, str
             print(result)
             return (result)
 
-def find_list_element_name(element_value, text, strategy_index, strategy_compare, strategy_merge, postprocess=postprocess, *args):
-    j = 0
+def find_list_element_name_ht_LXDH(element_value, text, strategy_index, strategy_compare, strategy_merge, postprocess=postprocess, *args):
+    resultlist = []
     for i in range(len(text)):
         if strategy_compare(element_value, text[i]["element_value"]):
             #print("key:", element_value)
-            j = j + 1
-            if j == 4:
-                result = postprocess(strategy_merge(text[i]["element_value"], text[strategy_index(i)]["element_value"]), args)
-                print(result)
-                return (result)
+            result = postprocess(strategy_merge(text[i]["element_value"], text[strategy_index(i)]["element_value"]), args)
+            #print(result)
+            resultlist.append(result)
+    print(resultlist[3])
+    return resultlist[3]
+
+
+def find_list_element_name_gjjs_LC(element_value, text, strategy_index, strategy_compare, strategy_merge, postprocess=postprocess, *args):
+    resultlist = []
+    for i in range(len(text)):
+        if strategy_compare(element_value, text[i]["element_value"]):
+            #print("key:", element_value)
+            result = postprocess(strategy_merge(text[i]["element_value"], text[strategy_index(i)]["element_value"]), args)
+            #print(result)
+            resultlist.append(result)
+    print(resultlist)
+    return resultlist
 
 '''--------------------------------------------------------------'''
 
 
+#合同和调查表
 def testhetong(file):
     r = postfile(file)
     text = gettext(r)
     box = getbox(r)
-    #print(text)
-    #print(box)
-    #print("-----------")
-    
-    
+     
     find_element_name("合同编号:", text, strategy_index_add1, strategy_compare_full, strategy_merge_direct)
     find_element_name("甲方(卖方):", text, strategy_index_add1, strategy_compare_full, strategy_merge_direct, postproess_1)
     find_element_name("乙方 (买方)", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
     find_element_name("证件类型:", text, strategy_index_add1, strategy_compare_full, strategy_merge_direct)
     find_element_name("号码:", text, strategy_index_add1, strategy_compare_full, strategy_merge_direct)
-    find_list_element_name("联系电话:", text, strategy_index_add1, strategy_compare_full, strategy_merge_direct)
+    find_list_element_name_ht_LXDH("联系电话:", text, strategy_index_add1, strategy_compare_full, strategy_merge_direct)
     find_element_name("本商品房项目:", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
     find_element_name("本商品房座落为", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
     find_element_name("本商品房建筑面积", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'本商品房.*[0-9: ]*平方米'])
-    find_element_name("总成交金额为", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_re, [r'总成交金额为[0-9, ]*元整']) 
+    find_element_name("总成交金额为", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_re, [r'总成交金额为[0-9, ]*元整'])
     find_element_name("本商品房为清水房", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r"建筑面积.{0,20}平方米"])
     find_element_name("本商品房总成交金额", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_re, [r"本商品房总成交.{0,5}[0-9: ]*元整"])
 
-    open('test.json', 'w').write(json.dumps(r.json(), ensure_ascii=False, indent=2))
+
+#国际结算业务
+def testgjjs(file):
+    r = postfile(file)
+    text = gettext(r)
+    box = getbox(r)
+     
+    find_element_name("Your Documentary Credit No", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
+    find_list_element_name_gjjs_LC("Drawn under documentary credit number", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'documentary credit number.*'])
+
+
+
 
 
 if __name__ == "__main__":
@@ -139,3 +159,4 @@ if __name__ == "__main__":
         exit(1)
 
     testhetong(args.file)
+    #testgjjs(args.file)
