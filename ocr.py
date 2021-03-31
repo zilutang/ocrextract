@@ -107,7 +107,7 @@ def find_element_name(element_value, text, strategy_index, strategy_compare, str
             print(result)
             return (result)
 
-def find_element_name_long(element_value, text, strategy_compare, strategy_merge, addlist=[], postprocess=postprocess, *args):
+def find_element_name_long(element_value, text, strategy_compare, strategy_merge=None, addlist=[], postprocess=postprocess, *args):
     for i in range(len(text)):
         if strategy_compare(element_value, text[i]["element_value"]):
             #print("key:", element_value)
@@ -179,7 +179,7 @@ def testgjjs(file):
     find_element_name("Ocean Vessel", text, strategy_index_add4, strategy_compare_part, strategy_merge_direct)
     find_element_name("Bill of Lading No", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
     find_element_name("Port of Discharge", text, strategy_index_add3, strategy_compare_part, strategy_merge_direct)
-    find_element_name_long("Port of Loading", text, strategy_compare_part, strategy_merge_long, addlist=[4,5])
+    find_element_name_long(element_value="Port of Loading", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[4,5])
 
 
 
