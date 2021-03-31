@@ -51,6 +51,15 @@ def strategy_index_add0(i):
 def strategy_index_add1(i):
     return i+1
 
+def strategy_index_add2(i):
+    return i+2
+
+def strategy_index_add3(i):
+    return i+3
+
+def strategy_index_add4(i):
+    return i+4
+
 def strategy_compare_full(var1, var2):
     return var1 == var2
 
@@ -62,6 +71,13 @@ def strategy_merge_self(var1, var2):
 
 def strategy_merge_direct(var1, var2):
     return var1+var2
+
+def strategy_merge_long(text, var1, addlist):
+    str=text[var1]["element_value"]
+    for item in addlist:
+        str = str + text[var1 + item]["element_value"]
+    #print(str)
+    return str
 
 def postprocess(var, *args):
     return var
@@ -91,6 +107,14 @@ def find_element_name(element_value, text, strategy_index, strategy_compare, str
             print(result)
             return (result)
 
+def find_element_name_long(element_value, text, strategy_compare, strategy_merge, addlist=[], postprocess=postprocess, *args):
+    for i in range(len(text)):
+        if strategy_compare(element_value, text[i]["element_value"]):
+            #print("key:", element_value)
+            result = postprocess(strategy_merge(text, i, addlist), args)
+    print(result)
+    return (result)
+
 def find_list_element_name_ht_LXDH(element_value, text, strategy_index, strategy_compare, strategy_merge, postprocess=postprocess, *args):
     resultlist = []
     for i in range(len(text)):
@@ -99,7 +123,8 @@ def find_list_element_name_ht_LXDH(element_value, text, strategy_index, strategy
             result = postprocess(strategy_merge(text[i]["element_value"], text[strategy_index(i)]["element_value"]), args)
             #print(result)
             resultlist.append(result)
-    print(resultlist[3])
+    if len(resultlist) > 0:
+        print(resultlist[3])
     return resultlist[3]
 
 
@@ -111,7 +136,8 @@ def find_list_element_name_gjjs_LC(element_value, text, strategy_index, strategy
             result = postprocess(strategy_merge(text[i]["element_value"], text[strategy_index(i)]["element_value"]), args)
             #print(result)
             resultlist.append(result)
-    print(resultlist)
+    if len(resultlist) > 0:
+        print(resultlist)
     return resultlist
 
 '''--------------------------------------------------------------'''
@@ -142,11 +168,18 @@ def testgjjs(file):
     r = postfile(file)
     text = gettext(r)
     box = getbox(r)
-     
+    
     find_element_name("Your Documentary Credit No", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
     find_list_element_name_gjjs_LC("Drawn under documentary credit number", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'documentary credit number.*'])
-
-
+    find_element_name("PORT OF LOADING", text, strategy_index_add2, strategy_compare_part, strategy_merge_direct)
+    find_element_name("PORT OF DISCHARGE", text, strategy_index_add2, strategy_compare_part, strategy_merge_direct)
+    find_element_name("CONTRACT NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
+    find_element_name("L/C NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
+    find_element_name("INV NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
+    find_element_name("Ocean Vessel", text, strategy_index_add4, strategy_compare_part, strategy_merge_direct)
+    find_element_name("Bill of Lading No", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
+    find_element_name("Port of Discharge", text, strategy_index_add3, strategy_compare_part, strategy_merge_direct)
+    find_element_name_long("Port of Loading", text, strategy_compare_part, strategy_merge_long, addlist=[4,5])
 
 
 
@@ -158,5 +191,5 @@ if __name__ == "__main__":
     if args.file is None:
         exit(1)
 
-    testhetong(args.file)
-    #testgjjs(args.file)
+    #testhetong(args.file)
+    testgjjs(args.file)
