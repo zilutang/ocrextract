@@ -120,6 +120,7 @@ def find_element_name_long(element_value, text, strategy_compare, strategy_merge
             result = postprocess(strategy_merge(text, i, addlist), args)
             print(result)
             return (result)
+    return ""
 
 def find_list_element_name_ht_LXDH(element_value, text, strategy_index, strategy_compare, strategy_merge, postprocess=postprocess, *args):
     resultlist = []
@@ -177,7 +178,7 @@ def testgjjs(file):
     r = postfile(file)
     text = gettext(r)
     box = getbox(r)
-    
+    #print(text)
 
     if "COAST FRASER ENTERPRISES LTD." == find_element_name_long(element_value="COAST FRASER", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[0]):
         find_element_name_long(element_value="Invoice No.", text=text, strategy_compare=strategy_compare_full, strategy_merge=strategy_merge_long, addlist=[1])
@@ -192,7 +193,13 @@ def testgjjs(file):
         find_list_element_name_gjjs_LC("Drawn under documentary credit number", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'documentary credit number.*'])
         find_element_name("PORT OF LOADING", text, strategy_index_add2, strategy_compare_part, strategy_merge_direct)
         find_element_name("PORT OF DISCHARGE", text, strategy_index_add2, strategy_compare_part, strategy_merge_direct)
-        find_element_name("CONTRACT NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'(.+(?=,))'])
+        if "SINOCHEM INTERNATIONAL" in find_element_name_long(element_value="SINOCHEM INTERNATIONAL", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[0]):
+            find_element_name("CONTRACT NO", text, strategy_index_add0, strategy_compare_part, strategy_merge_self)
+        if "Amer Cotton Mills" in find_element_name_long(element_value="Amer Cotton Mills", text=text, strategy_compare=strategy_compare_part, strategy_merge=strategy_merge_long, addlist=[0]):
+            #print("Amer")
+            find_element_name("CONTRACT NO", text, strategy_index_add0, strategy_compare_part, strategy_merge_self, postprocess_re, [r'(.+(?=,))'])
+        else:
+            find_element_name("CONTRACT NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
         find_element_name("L/C NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
         find_element_name("L/C No", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct, postprocess_re, [r'(.+(?= DATED))'])
         find_element_name("INV NO", text, strategy_index_add1, strategy_compare_part, strategy_merge_direct)
